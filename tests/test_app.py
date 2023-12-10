@@ -1,6 +1,6 @@
 import unittest
 
-from src.pydi.app import *
+from src.dinjections.app import *
 
 
 class TestClass0:
