@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+src/dinjections/__init__.py
+src/dinjections/app.py
+src/dinjections/exceptions.py
+src/dinjections/lifecycle.py
+src/dinjections/module.py
+src/dinjections/options.py
+src/dinjections.egg-info/PKG-INFO
+src/dinjections.egg-info/SOURCES.txt
+src/dinjections.egg-info/dependency_links.txt
+src/dinjections.egg-info/requires.txt
+src/dinjections.egg-info/top_level.txt
+tests/test_app.py
