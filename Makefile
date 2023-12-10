@@ -16,4 +16,4 @@ build:
 	twine check dist/*
 
 upload:
-	twine upload -r testpypi dist/*
+	twine upload dist/*
