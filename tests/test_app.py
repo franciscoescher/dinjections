@@ -189,22 +189,21 @@ class TestApp(unittest.TestCase):
         self.assertTrue(True)
 
     def test_modularity(self):
-        m1 = [
-            Provide(
-                Provider(TestClass1, "t1"),
-                Provider(TestClass1, "t2"),
-            )]
-        m2 = [Provide(
+        m1 = Module(Provide(
+            Provider(TestClass1, name="t1"),
+            Provider(TestClass1, name="t2"),
+        ))
+        m2 = Module(Provide(
             TestClass2,
             new_test_class_3,
         ),
             Invoke(
                 register_hooks,
-        )]
+        ))
         try:
             app = App(
-                *m1,
-                *m2)
+                m1,
+                m2)
             app.run()
         except Exception as e:
             self.fail("Exception: " + str(e))

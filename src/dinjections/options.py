@@ -1,22 +1,8 @@
 import typing
 
-
 from .app import *
 from .module import *
-
-
-class Provider:
-    def __init__(self, provider: object, name: str = None, group: bool = False):
-        self.provider = provider
-        if name is None:
-            self.name = provider
-        self.name = name
-        self.group = group
-
-
-class Option:
-    def apply(self, mod: Module):
-        pass
+from .exceptions import *
 
 
 class Provide(Option):
@@ -70,16 +56,6 @@ class Provide(Option):
         mod.add_provides(self._targets)
 
 
-def get_requires_from_hints(hints) -> [str]:
-    requires = []
-    for key, value in hints.items():
-        if key == "return":
-            continue
-        else:
-            requires.append(value)
-    return requires
-
-
 class Invoke(Option):
     def __init__(self, *args):
         self._targets = []
@@ -95,3 +71,13 @@ class Invoke(Option):
 
     def apply(self, mod: Module):
         mod.add_invokes(self._targets)
+
+
+def get_requires_from_hints(hints) -> [str]:
+    requires = []
+    for key, value in hints.items():
+        if key == "return":
+            continue
+        else:
+            requires.append(value)
+    return requires

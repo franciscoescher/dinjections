@@ -13,7 +13,9 @@ class Lifecycle:
 
     def start(self):
         for hook in self.hooks:
-            if callable(hook.on_start):
-                hook.on_start()
-            if callable(hook.on_stop):
-                hook.on_stop()
+            try:
+                if callable(hook.on_start):
+                    hook.on_start()
+            finally:
+                if callable(hook.on_stop):
+                    hook.on_stop()
