@@ -3,10 +3,6 @@ import unittest
 from src.dinjections import *
 
 
-class TestClass0:
-    pass
-
-
 class TestClass1:
     pass
 
@@ -65,9 +61,8 @@ class TestApp(unittest.TestCase):
     def test_missing_dependency(self):
         exc = None
         try:
-            provides = Provide()
             app = App(
-                provides,
+                Provide(),
                 Invoke(
                     register_hooks,
                 ))
@@ -208,6 +203,24 @@ class TestApp(unittest.TestCase):
         except Exception as e:
             self.fail("Exception: " + str(e))
         self.assertTrue(True)
+
+    def test_cyclic_dependency(self):
+        def new_test_class_3_cyclic(p: TestClass3) -> TestClass3:
+            return TestClass3()
+
+        exc = None
+        try:
+            app = App(
+                Provide(new_test_class_3_cyclic),
+                Invoke(
+                    register_hooks,
+                ))
+
+            app.run()
+        except Exception as e:
+            exc = e
+
+        self.assertIsInstance(exc, RecursionError)
 
 
 if __name__ == '__main__':
