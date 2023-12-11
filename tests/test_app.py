@@ -222,6 +222,32 @@ class TestApp(unittest.TestCase):
 
         self.assertIsInstance(exc, RecursionError)
 
+    def test_inherited(self):
+        class TestClass4(TestClass3):
+            pass
+
+        def register_hooks(l: Lifecycle, t: Provider(TestClass3, name="t1")):
+            l.append_hook(Hook(
+                on_start=lambda: {
+                    t.run()
+                },
+            ))
+
+        exc = None
+        try:
+            app = App(
+                Provide(
+                    Provider(TestClass4, name="t1"),
+                ),
+                Invoke(
+                    register_hooks,
+                ))
+
+            app.run()
+        except Exception as e:
+            self.fail("Exception: " + str(e))
+        self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()

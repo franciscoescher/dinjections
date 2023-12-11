@@ -65,17 +65,17 @@ class Module:
                 raise MissingDependencyError("Cannot find dependency", key)
 
             if key in self.container:
-                if isinstance(require, Provider) and require.provider != self.container[key].__class__:
+                if isinstance(require, Provider) and not issubclass(self.container[key].__class__, require.provider):
                     raise DependencyTypeError("Dependency is of wrong type", key,
                                               self.container[key].__class__, "but should be of type", require.provider)
                 inject.append(self.container[key])
             else:
                 provider = self.build_provider(self._provides[key])
                 if isinstance(require, Provider):
-                    if not require.group and require.provider != provider.__class__:
+                    if not require.group and not issubclass(provider.__class__, require.provider):
                         raise DependencyTypeError("Dependency is of wrong type", key,
                                                   provider.__class__, "but should be of type", require.provider)
-                    if require.group and require.provider != provider[0].__class__:
+                    if require.group and not issubclass(provider[0].__class__, require.provider):
                         raise DependencyTypeError("Dependency is of wrong type", key,
                                                   provider[0].__class__, "but should be of type", require.group)
                 self.container[key] = provider
