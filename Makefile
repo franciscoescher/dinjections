@@ -1,3 +1,6 @@
+test:
+	python -m unittest tests/test_*.py
+
 version:
 	bumpver init
 

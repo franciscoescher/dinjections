@@ -23,9 +23,15 @@ class Module:
         if not isinstance(targets, dict):
             raise PyDITypeError("Provide targets must be a dict")
         for key, value in targets.items():
-            if not isinstance(value, ProvideTarget):
+            if not isinstance(value, ProvideTarget) and not isinstance(value, list):
                 raise PyDITypeError(
-                    "Provide target must be of type ProvideTarget")
+                    "Provide target must be of type ProvideTarget or list of ProvideTarget")
+            if isinstance(value, list):
+                for target in value:
+                    if not isinstance(target, ProvideTarget):
+                        raise PyDITypeError(
+                            "Provide target list element must be of type ProvideTarget")
+
         self._provides = self._provides | targets
 
     def add_invokes(self, targets: [InvokeTarget]):

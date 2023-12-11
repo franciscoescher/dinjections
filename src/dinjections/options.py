@@ -5,12 +5,13 @@ from .app import *
 from .module import *
 
 
-
-class NamedProvider:
-    def __init__(self, name: str, provider: object):
-        self.name = name
+class Provider:
+    def __init__(self, provider: object, name: str = None, group: bool = False):
         self.provider = provider
-
+        if name is None:
+            self.name = provider
+        self.name = name
+        self.group = group
 
 
 class Option:
@@ -18,16 +19,28 @@ class Option:
         pass
 
 
-class ProvideOption(Option):
+class Provide(Option):
     def __init__(self, *args):
         self._targets = {}
         for arg in args:
-            if isinstance(arg, NamedProvider):
+            if isinstance(arg, Provider):
                 hints = typing.get_type_hints(arg.provider.__init__)
-                self._targets[arg.name] = ProvideTarget(
-                    callable=arg.provider,
-                    provides=arg.name,
-                    requires=get_requires_from_hints(hints))
+
+                if not arg.group:
+                    self._targets[arg.name] = ProvideTarget(
+                        callable=arg.provider,
+                        provides=arg.name,
+                        requires=get_requires_from_hints(hints))
+                    
+                else:
+                    if arg.name not in self._targets:
+                        self._targets[arg.name] = []
+
+                    self._targets[arg.name].append(ProvideTarget(
+                        callable=arg.provider,
+                        provides=arg.name,
+                        requires=get_requires_from_hints(hints)))
+                    
                 continue
 
             # check if it is a class of any type
@@ -51,10 +64,11 @@ class ProvideOption(Option):
                 continue
 
             raise PyDITypeError(
-                "Provide target must be a callable constructor, a class or a NamedProvider")
+                "Provide target must be a callable constructor, a class or a Provider")
 
     def apply(self, mod: Module):
         mod.add_provides(self._targets)
+
 
 def get_requires_from_hints(hints) -> [str]:
     requires = []
@@ -66,7 +80,7 @@ def get_requires_from_hints(hints) -> [str]:
     return requires
 
 
-class InvokeOption(Option):
+class Invoke(Option):
     def __init__(self, *args):
         self._targets = []
         for arg in args:

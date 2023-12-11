@@ -18,7 +18,7 @@ pip install dinjections
 ## Usage
 
 ```python
-from dinjections import App, ProvideOption, InvokeOption, Hook, Lifecycle, NamedProvider
+from dinjections import App, Provide, Invoke, Hook, Lifecycle, Provider
 
 
 # Define a class that will be injected
@@ -27,7 +27,7 @@ class Dependency0:
 
 # Define a class that will be injected and has dependencies of the same type
 class Dependency1:
-  def __init__(self, d0_1: NamedProvider("d0_1", Dependency0), d0_2: NamedProvider("d0_2", Dependency0)):
+  def __init__(self, d0_1: Provider(Dependency0, name="d0_1"), d0_2: Provider(Dependency0, name="d0_2")):
     self.d0_1 = d0_1
     self.d0_2 = d0_2
 
@@ -47,7 +47,7 @@ def new_dep_2(d1: Dependency1) -> Dependency2:
     return Dependency2()
 
 # function that will be invoked
-def invoker(l: Lifecycle, d: Dependency2):
+def register_hooks(l: Lifecycle, d: Dependency2):
     l.append_hook(Hook(
         on_start=lambda: {
             d.run()
@@ -55,17 +55,17 @@ def invoker(l: Lifecycle, d: Dependency2):
     ))
 
 app = App(
-    ProvideOption(
+    Provide(
         # dependency can be initiliazed passing it's class
         Dependency1,
         # and also with a function that returns the object
         new_dep_2,
         # you can also define a name for the dependency, in case there is more than one dependency of the same type
-        NamedProvider("d0_1", Dependency0),
-        NamedProvider("d0_2", Dependency0),
+        Provider(Dependency0, name="d0_1"),
+        Provider(Dependency0, name="d0_2"),
     ),
-    InvokeOption(
-        invoker,
+    Invoke(
+        register_hooks,
     ))
 
 app.run()
@@ -74,9 +74,42 @@ app.run()
 
 ## Dependencies of the same type
 
-If you have dependencies of the same type, you can use the `NamedProvider` class to define a name for the dependency, and then use it to inject the dependency (as shown above).
+If you have dependencies of the same type, you can use the `Provider` class to define a name for the dependency, and then use it to inject the dependency (as shown above).
 
 If this is not done, a dependency will override the previous.
+
+
+## Grouped dependencies
+
+You can group dependencies setting the `group` parameters to `True` in a `Provider`. This will make the dependency be injected as a list of dependencies, with all the dependencies that were provided with the same name.
+
+```python
+class MyDependency:
+    def __init__(self):
+
+    def run(self):
+        print("MyDependency running")
+
+def register_hooks(l: Lifecycle, d: Provider(MyDependency, group=True)):
+    # d is now a list of MyDependency, with all the dependencies named "md" that were provided
+    for t in d:
+        l.append_hook(Hook(
+            on_start=lambda: {
+                t.run()
+            },
+        ))
+
+app = App(
+    Provide(
+        Provider(MyDependency, group=True),
+        Provider(MyDependency, group=True),
+    ),
+    Invoke(
+        register_hooks,
+    ))
+app.run()
+```
+
 
 ## Lifecycle
 
@@ -88,7 +121,7 @@ Currently hooks are executed in the order they are defined, with no support for 
 from dinjections import App, Hook, Lifecycle
 
 
-def invoker(l: Lifecycle):
+def register_hooks(l: Lifecycle):
     l.append_hook(Hook(
         on_start=lambda: {
             print("Invoking 1")
@@ -107,8 +140,8 @@ def invoker(l: Lifecycle):
     ))
 
 app = App(
-  InvokeOption(
-        invoker,
+    Invoke(
+        register_hooks,
     )
 )
 app.run()
