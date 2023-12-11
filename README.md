@@ -88,7 +88,7 @@ class TestClass4(TestClass3):
     pass
 
 # expects a dependency of type TestClass3, but will accept TestClass4 named "t1"
-def register_hooks(l: Lifecycle, t: Provider(TestClass3, name="t1")):
+def register_hooks(l: Lifecycle, t: TestClass3):
     l.append_hook(Hook(
         on_start=lambda: {
             t.run()
@@ -98,7 +98,7 @@ def register_hooks(l: Lifecycle, t: Provider(TestClass3, name="t1")):
 app = App(
     Provide(
         # provides names dependency that inherites from expected class TestClass3
-        Provider(TestClass4, name="t1"),
+        Provider(TestClass4, name=TestClass3),
     ),
     Invoke(
         register_hooks,

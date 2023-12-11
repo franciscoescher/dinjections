@@ -226,18 +226,17 @@ class TestApp(unittest.TestCase):
         class TestClass4(TestClass3):
             pass
 
-        def register_hooks(l: Lifecycle, t: Provider(TestClass3, name="t1")):
+        def register_hooks(l: Lifecycle, t: TestClass3):
             l.append_hook(Hook(
                 on_start=lambda: {
                     t.run()
                 },
             ))
 
-        exc = None
         try:
             app = App(
                 Provide(
-                    Provider(TestClass4, name="t1"),
+                    Provider(TestClass4, name=TestClass3),
                 ),
                 Invoke(
                     register_hooks,
