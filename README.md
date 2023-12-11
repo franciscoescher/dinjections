@@ -74,9 +74,38 @@ app.run()
 
 ## Dependencies of the same type
 
-If you have dependencies of the same type, you can use the `Provider` class to define a name for the dependency, and then use it to inject the dependency (as shown above).
+If you have dependencies of the same type, you can use the `Provider` class to define a name for the dependency with the name argument, and then use it to inject the dependency (as shown above).
 
 If this is not done, a dependency will override the previous.
+
+## Dependency inheritance
+
+If you have a dependency that inherits from another, you can use the `Provider` class to define the dependency with a name argument, and then use it to inject the dependency (as shown below).
+
+```python
+# Define a class that will be injected
+class TestClass4(TestClass3):
+    pass
+
+# expects a dependency of type TestClass3, but will accept TestClass4 named "t1"
+def register_hooks(l: Lifecycle, t: Provider(TestClass3, name="t1")):
+    l.append_hook(Hook(
+        on_start=lambda: {
+            t.run()
+        },
+    ))
+
+app = App(
+    Provide(
+        # provides names dependency that inherites from expected class TestClass3
+        Provider(TestClass4, name="t1"),
+    ),
+    Invoke(
+        register_hooks,
+    ))
+
+app.run()
+```
 
 
 ## Grouped dependencies
