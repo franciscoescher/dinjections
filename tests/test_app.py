@@ -51,9 +51,6 @@ class TestApp(unittest.TestCase):
                     # test named provider
                     Provider(TestClass1, "t1"),
                     Provider(TestClass1, "t2"),
-                ),
-                # test modular implementation
-                Provide(
                     TestClass2,
                     new_test_class_3,
                 ),
@@ -186,6 +183,28 @@ class TestApp(unittest.TestCase):
                 Invoke(
                     register_hooks,
                 ))
+            app.run()
+        except Exception as e:
+            self.fail("Exception: " + str(e))
+        self.assertTrue(True)
+
+    def test_modularity(self):
+        m1 = [
+            Provide(
+                Provider(TestClass1, "t1"),
+                Provider(TestClass1, "t2"),
+            )]
+        m2 = [Provide(
+            TestClass2,
+            new_test_class_3,
+        ),
+            Invoke(
+                register_hooks,
+        )]
+        try:
+            app = App(
+                *m1,
+                *m2)
             app.run()
         except Exception as e:
             self.fail("Exception: " + str(e))
