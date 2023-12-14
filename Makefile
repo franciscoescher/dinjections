@@ -14,7 +14,7 @@ build:
 	rm -rf dist
 	pip-compile pyproject.toml
 	python -m build
-	twine check dist/*
+	python -m twine check dist/*
 
 upload:
-	twine upload dist/*
+	python -m twine upload dist/*
