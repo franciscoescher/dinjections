@@ -27,7 +27,13 @@ class Provider:
         self.group = group
 
 
-class Module:
+class Option:
+    # This is the base class for the functional options pattern.
+    def apply(self, mod):
+        pass
+
+
+class Module(Option):
     # This is a class that is used to store all the dependencies and invoke targets,
     # and also holds the lifecycle object and the built dependencies.
     def __init__(self, *args):
@@ -40,6 +46,10 @@ class Module:
                 raise PyDITypeError(
                     "App constructor arguments must be of type Option")
             option.apply(self)
+
+    def apply(self, mod):
+        self.add_provides(mod._provides)
+        self.add_invokes(mod._invokes)
 
     def register_container(self, container: dict) -> None:
         self.container = container
@@ -130,9 +140,3 @@ class Module:
                 raise PyDITypeError(
                     "Invoke target must be of type InvokeTarget")
         self._invokes.extend(targets)
-
-
-class Option:
-    # This is the base class for the functional options pattern.
-    def apply(self, mod: Module):
-        pass

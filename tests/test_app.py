@@ -196,9 +196,7 @@ class TestApp(unittest.TestCase):
                 register_hooks,
         ))
         try:
-            app = App(
-                m1,
-                m2)
+            app = App(Module(m1, m2))
             app.run()
         except Exception as e:
             self.fail("Exception: " + str(e))
