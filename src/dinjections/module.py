@@ -48,8 +48,8 @@ class Module(Option):
             option.apply(self)
 
     def apply(self, mod):
-        self.add_provides(mod._provides)
-        self.add_invokes(mod._invokes)
+        mod.add_provides(self._provides)
+        mod.add_invokes(self._invokes)
 
     def register_container(self, container: dict) -> None:
         self.container = container
