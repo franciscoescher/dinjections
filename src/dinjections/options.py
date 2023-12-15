@@ -11,7 +11,7 @@ class Provide(Option):
         for arg in args:
             if isinstance(arg, Provider):
                 hints = typing.get_type_hints(arg.provider.__init__)
-                self.init_provider(arg, hints)
+                self.init_provider(arg, hints, arg.provider)
                 continue
 
             # check if it is a class of any type
@@ -30,7 +30,7 @@ class Provide(Option):
                         "Provide target must have a return type hint")
                 
                 if isinstance(hints["return"], Provider):
-                    self.init_provider(hints["return"], hints)
+                    self.init_provider(hints["return"], hints, arg)
                     continue
 
                 if isinstance(hints["return"], type):
@@ -43,10 +43,10 @@ class Provide(Option):
             raise PyDITypeError(
                 "Provide target must be a callable constructor, a class or a Provider")
         
-    def init_provider(self, arg: Provider, hints: dict):
+    def init_provider(self, arg: Provider, hints: dict, call: callable):
         if not arg.group:
             self._targets[arg.name] = ProvideTarget(
-                callable=arg.provider,
+                callable=call,
                 provides=arg.name,
                 requires=get_requires_from_hints(hints))
             
@@ -55,7 +55,7 @@ class Provide(Option):
                 self._targets[arg.name] = []
 
             self._targets[arg.name].append(ProvideTarget(
-                callable=arg.provider,
+                callable=call,
                 provides=arg.name,
                 requires=get_requires_from_hints(hints)))
 

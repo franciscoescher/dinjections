@@ -202,6 +202,28 @@ class TestApp(unittest.TestCase):
             self.fail("Exception: " + str(e))
         self.assertTrue(True)
 
+    def test_callable_with_provider(self):
+        def new_test_class_3_named(p: TestClass1) -> Provider(TestClass3, name="t3"):
+            return TestClass3()
+        def register_hooks_named(l: Lifecycle, t: Provider(TestClass3, name="t3")):
+            l.append_hook(Hook(
+                on_start=lambda: {
+                    t.run()
+                },
+            ))
+        try:
+            app = App(Module(Provide(
+                TestClass1,
+                new_test_class_3_named,
+            ),
+                Invoke(
+                register_hooks_named,
+            )))
+            app.run()
+        except Exception as e:
+            self.fail("Exception: " + str(e))
+        self.assertTrue(True)
+
     def test_cyclic_dependency(self):
         def new_test_class_3_cyclic(p: TestClass3) -> TestClass3:
             return TestClass3()
