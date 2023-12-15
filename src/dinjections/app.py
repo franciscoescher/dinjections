@@ -1,3 +1,5 @@
+from typing import List
+
 from .exceptions import *
 from .module import *
 from .options import *
@@ -5,12 +7,12 @@ from .lifecycle import *
 
 
 class App():
-    def __init__(self, *args):
+    def __init__(self, *args: List[Module | Option]):
         # container and provides are shared between all modules
         self.container = {}
-        self.provides = {}
+        self.provides: Dict[str, ProvideTarget] = {}
         # list of modules to be run
-        self.modules = []
+        self.modules: List[Module] = []
         
         options = []
         for arg in args:

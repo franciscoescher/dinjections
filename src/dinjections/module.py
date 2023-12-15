@@ -1,3 +1,5 @@
+from typing import Dict
+
 from .exceptions import *
 from .lifecycle import *
 
@@ -19,18 +21,17 @@ class InvokeTarget:
 
 class Provider:
     # This is a class that is used to build advanced dependencies definitions.
-    def __init__(self, provider: object, name: str = None, group: bool = False):
+    def __init__(self, provider: object, name: str | None = None, group: bool = False):
         self.provider = provider
+        self.name = name
         if name is None:
             self.name = provider
-        else:
-            self.name = name
         self.group = group
 
 
 class Option:
     # This is the base class for the functional options pattern.
-    def apply(self, mod):
+    def apply(self, mod: 'Module'):
         pass
 
 
@@ -39,7 +40,7 @@ class Module(Option):
     # and also holds the lifecycle object and the built dependencies.
     def __init__(self, *args):
         self.lifecycle = Lifecycle()
-        self._provides: dict = {}
+        self._provides: Dict[str, ProvideTarget] = {}
         self._invokes: [InvokeTarget] = []
 
         for option in args:
@@ -48,17 +49,17 @@ class Module(Option):
                     "App constructor arguments must be of type Option")
             option.apply(self)
 
-    def apply(self, mod):
+    def apply(self, mod: 'Module'):
         mod.add_provides(self._provides)
         mod.add_invokes(self._invokes)
 
-    def register_container(self, container: dict) -> None:
+    def register_container(self, container: Dict[str, ProvideTarget]) -> None:
         self.container = container
 
-    def set_provides(self, provides: dict) -> None:
+    def set_provides(self, provides: Dict[str, ProvideTarget]) -> None:
         self._provides = provides
 
-    def get_provides(self) -> dict:
+    def get_provides(self) -> Dict[str, ProvideTarget]:
         return self._provides
 
     def build_dependencies(self, target: ProvideTarget | InvokeTarget) -> []:

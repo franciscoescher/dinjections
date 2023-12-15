@@ -11,22 +11,7 @@ class Provide(Option):
         for arg in args:
             if isinstance(arg, Provider):
                 hints = typing.get_type_hints(arg.provider.__init__)
-
-                if not arg.group:
-                    self._targets[arg.name] = ProvideTarget(
-                        callable=arg.provider,
-                        provides=arg.name,
-                        requires=get_requires_from_hints(hints))
-                    
-                else:
-                    if arg.name not in self._targets:
-                        self._targets[arg.name] = []
-
-                    self._targets[arg.name].append(ProvideTarget(
-                        callable=arg.provider,
-                        provides=arg.name,
-                        requires=get_requires_from_hints(hints)))
-                    
+                self.init_provider(arg, hints)
                 continue
 
             # check if it is a class of any type
@@ -43,14 +28,36 @@ class Provide(Option):
                 if "return" not in hints:
                     raise MissingHintError(
                         "Provide target must have a return type hint")
-                self._targets[hints["return"]] = ProvideTarget(
-                    callable=arg,
-                    provides=hints["return"],
-                    requires=get_requires_from_hints(hints))
-                continue
+                
+                if isinstance(hints["return"], Provider):
+                    self.init_provider(hints["return"], hints)
+                    continue
+
+                if isinstance(hints["return"], type):
+                    self._targets[hints["return"]] = ProvideTarget(
+                        callable=arg,
+                        provides=hints["return"],
+                        requires=get_requires_from_hints(hints))
+                    continue
 
             raise PyDITypeError(
                 "Provide target must be a callable constructor, a class or a Provider")
+        
+    def init_provider(self, arg: Provider, hints: dict):
+        if not arg.group:
+            self._targets[arg.name] = ProvideTarget(
+                callable=arg.provider,
+                provides=arg.name,
+                requires=get_requires_from_hints(hints))
+            
+        else:
+            if arg.name not in self._targets:
+                self._targets[arg.name] = []
+
+            self._targets[arg.name].append(ProvideTarget(
+                callable=arg.provider,
+                provides=arg.name,
+                requires=get_requires_from_hints(hints)))
 
     def apply(self, mod: Module):
         mod.add_provides(self._targets)
