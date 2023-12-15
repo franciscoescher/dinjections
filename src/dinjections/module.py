@@ -23,7 +23,8 @@ class Provider:
         self.provider = provider
         if name is None:
             self.name = provider
-        self.name = name
+        else:
+            self.name = name
         self.group = group
 
 
