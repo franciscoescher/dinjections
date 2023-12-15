@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dinjections"
-version = "1.0.7"
+version = "1.0.8"
 description = "Dependency injection framework based on uber.fx for python"
 readme = "README.md"
 authors = [{ name = "Francisco Escher Guimarães da Silva", email = "egs.francisco@gmail.com" }]
