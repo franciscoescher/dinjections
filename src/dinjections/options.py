@@ -1,8 +1,8 @@
 import typing
 
 from .app import *
-from .module import *
 from .exceptions import *
+from .module import *
 
 
 class Provide(Option):
@@ -18,17 +18,17 @@ class Provide(Option):
             if isinstance(arg, type):
                 hints = typing.get_type_hints(arg.__init__)
                 self._targets[arg] = ProvideTarget(
-                    callable=arg,
-                    provides=arg,
-                    requires=get_requires_from_hints(hints))
+                    callable=arg, provides=arg, requires=get_requires_from_hints(hints)
+                )
                 continue
 
             if callable(arg):
                 hints = typing.get_type_hints(arg)
                 if "return" not in hints:
                     raise MissingHintError(
-                        "Provide target must have a return type hint")
-                
+                        "Provide target must have a return type hint"
+                    )
+
                 if isinstance(hints["return"], Provider):
                     self.init_provider(hints["return"], hints, arg)
                     continue
@@ -37,27 +37,33 @@ class Provide(Option):
                     self._targets[hints["return"]] = ProvideTarget(
                         callable=arg,
                         provides=hints["return"],
-                        requires=get_requires_from_hints(hints))
+                        requires=get_requires_from_hints(hints),
+                    )
                     continue
 
             raise PyDITypeError(
-                "Provide target must be a callable constructor, a class or a Provider")
-        
+                "Provide target must be a callable constructor, a class or a Provider"
+            )
+
     def init_provider(self, arg: Provider, hints: dict, call: callable):
         if not arg.group:
             self._targets[arg.name] = ProvideTarget(
                 callable=call,
                 provides=arg.name,
-                requires=get_requires_from_hints(hints))
-            
+                requires=get_requires_from_hints(hints),
+            )
+
         else:
             if arg.name not in self._targets:
                 self._targets[arg.name] = []
 
-            self._targets[arg.name].append(ProvideTarget(
-                callable=call,
-                provides=arg.name,
-                requires=get_requires_from_hints(hints)))
+            self._targets[arg.name].append(
+                ProvideTarget(
+                    callable=call,
+                    provides=arg.name,
+                    requires=get_requires_from_hints(hints),
+                )
+            )
 
     def apply(self, mod: Module):
         mod.add_provides(self._targets)
@@ -72,9 +78,9 @@ class Invoke(Option):
 
             hints = typing.get_type_hints(arg)
 
-            self._targets.append(InvokeTarget(
-                callable=arg,
-                requires=get_requires_from_hints(hints)))
+            self._targets.append(
+                InvokeTarget(callable=arg, requires=get_requires_from_hints(hints))
+            )
 
     def apply(self, mod: Module):
         mod.add_invokes(self._targets)
