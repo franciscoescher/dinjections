@@ -1,4 +1,4 @@
-import typing
+from typing import get_type_hints
 
 from .app import *
 from .exceptions import *
@@ -10,20 +10,20 @@ class Provide(Option):
         self._targets = {}
         for arg in args:
             if isinstance(arg, Provider):
-                hints = typing.get_type_hints(arg.provider.__init__)
+                hints = get_type_hints(arg.provider.__init__)
                 self.init_provider(arg, hints, arg.provider)
                 continue
 
             # check if it is a class of any type
             if isinstance(arg, type):
-                hints = typing.get_type_hints(arg.__init__)
+                hints = get_type_hints(arg.__init__)
                 self._targets[arg] = ProvideTarget(
                     callable=arg, provides=arg, requires=get_requires_from_hints(hints)
                 )
                 continue
 
             if callable(arg):
-                hints = typing.get_type_hints(arg)
+                hints = get_type_hints(arg)
                 if "return" not in hints:
                     raise MissingHintError(
                         "Provide target must have a return type hint"
@@ -76,7 +76,7 @@ class Invoke(Option):
             if not callable(arg):
                 raise PyDITypeError("Provide target must be callable")
 
-            hints = typing.get_type_hints(arg)
+            hints = get_type_hints(arg)
 
             self._targets.append(
                 InvokeTarget(callable=arg, requires=get_requires_from_hints(hints))
