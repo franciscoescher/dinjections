@@ -53,7 +53,8 @@ class Module(Option):
 
         for option in args:
             if not isinstance(option, Option):
-                raise PyDITypeError("App constructor arguments must be of type Option")
+                raise PyDITypeError(
+                    "App constructor arguments must be of type Option")
             option.apply(self)
 
     def apply(self, mod: "Module"):
@@ -88,7 +89,7 @@ class Module(Option):
 
             target = key_in(key, self.container)
             if target is not None:
-                if isinstance(require, Provider) and not issubclass(
+                if isinstance(require, Provider) and inspect.isclass(target) and not issubclass(
                     target, require.provider
                 ):
                     raise DependencyTypeError(
@@ -136,7 +137,8 @@ class Module(Option):
                 return target.callable(*inject)
             except TypeError as e:
                 if "missing" in str(e):
-                    raise MissingHintError(str(e), "verify if all hints are set")
+                    raise MissingHintError(
+                        str(e), "verify if all hints are set")
                 raise e
 
         elements = []
@@ -150,7 +152,8 @@ class Module(Option):
                 elements.append(element.callable(*inject))
             except TypeError as e:
                 if "missing" in str(e):
-                    raise MissingHintError(str(e), "verify if all hints are set")
+                    raise MissingHintError(
+                        str(e), "verify if all hints are set")
                 raise e
         return elements
 
@@ -174,7 +177,8 @@ class Module(Option):
     def add_invokes(self, targets: [InvokeTarget]):
         for target in targets:
             if not isinstance(target, InvokeTarget):
-                raise PyDITypeError("Invoke target must be of type InvokeTarget")
+                raise PyDITypeError(
+                    "Invoke target must be of type InvokeTarget")
         self._invokes.extend(targets)
 
 
