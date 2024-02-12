@@ -8,7 +8,7 @@ from .lifecycle import *
 
 class ProvideTarget:
     # This is a class to store the dependencies definitions within a module.
-    def __init__(self, callable: callable, provides: str, requires: [str]):
+    def __init__(self, callable: callable, provides: str, requires: List[str]):
         self.callable = callable
         self.provides = provides
         self.requires = requires
@@ -22,7 +22,7 @@ ContainerType = Dict[ProviderKey, ConternerTargetType]
 
 class InvokeTarget:
     # This is a class to store the invoke definitions within a module.
-    def __init__(self, callable: callable, requires: [str]):
+    def __init__(self, callable: callable, requires: List[str]):
         self.callable = callable
         self.requires = requires
 
@@ -49,7 +49,7 @@ class Module(Option):
     def __init__(self, *args):
         self.lifecycle = Lifecycle()
         self._provides: ProvidesType = {}
-        self._invokes: [InvokeTarget] = []
+        self._invokes: List[InvokeTarget] = []
 
         for option in args:
             if not isinstance(option, Option):
@@ -70,7 +70,7 @@ class Module(Option):
     def get_provides(self) -> ProvidesType:
         return self._provides
 
-    def build_dependencies(self, target: ProvideTarget | InvokeTarget) -> []:
+    def build_dependencies(self, target: ProvideTarget | InvokeTarget) -> List:
         inject = []
         for require in target.requires:
             if require == Lifecycle:
@@ -174,7 +174,7 @@ class Module(Option):
 
         self._provides = self._provides | targets
 
-    def add_invokes(self, targets: [InvokeTarget]):
+    def add_invokes(self, targets: List[InvokeTarget]):
         for target in targets:
             if not isinstance(target, InvokeTarget):
                 raise PyDITypeError(

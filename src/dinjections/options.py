@@ -86,7 +86,7 @@ class Invoke(Option):
         mod.add_invokes(self._targets)
 
 
-def get_requires_from_hints(hints) -> [str]:
+def get_requires_from_hints(hints) -> List[str]:
     requires = []
     for key, value in hints.items():
         if key == "return":
