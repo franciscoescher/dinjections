@@ -37,6 +37,15 @@ class Provider:
         self.group = group
 
 
+class Annotations:
+    def __init__(self, name: str | None = None, group: bool = False):
+        self.name = name
+        self.group = group
+
+    def to_provider(self, provider: object) -> Provider:
+        return Provider(provider, name=self.name, group=self.group)
+
+
 class Option:
     # This is the base class for the functional options pattern.
     def apply(self, mod: "Module"):

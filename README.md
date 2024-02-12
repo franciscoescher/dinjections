@@ -18,7 +18,7 @@ pip install dinjections
 ## Usage
 
 ```python
-from dinjections import App, Provide, Invoke, Hook, Lifecycle, Provider
+from dinjections import App, Provide, Invoke, Hook, Lifecycle, Provider, Annotated, Annotations
 
 
 # Define a class that will be injected
@@ -27,7 +27,7 @@ class Dependency0:
 
 # Define a class that will be injected and has dependencies of the same type
 class Dependency1:
-  def __init__(self, d0_1: Provider(Dependency0, name="d0_1"), d0_2: Provider(Dependency0, name="d0_2")):
+  def __init__(self, d0_1: Annotated[Dependency0, Annotations(name="d0_1")], d0_2: Annotated[Dependency0, Annotations(name="d0_2")]):
     self.d0_1 = d0_1
     self.d0_2 = d0_2
 
@@ -119,7 +119,7 @@ class MyDependency:
     def run(self):
         print("MyDependency running")
 
-def register_hooks(l: Lifecycle, d: Provider(MyDependency, group=True)):
+def register_hooks(l: Lifecycle, d: Annotated[MyDependency, Annotations(group=True)]):
     # d is now a list of MyDependency, with all the dependencies named "md" that were provided
     for t in d:
         l.append_hook(Hook(

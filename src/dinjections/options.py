@@ -1,4 +1,4 @@
-from typing import get_type_hints
+from typing import get_type_hints, Annotated, get_origin, get_args
 
 from .app import *
 from .exceptions import *
@@ -10,20 +10,21 @@ class Provide(Option):
         self._targets = {}
         for arg in args:
             if isinstance(arg, Provider):
-                hints = get_type_hints(arg.provider.__init__)
+                hints = get_hints(arg.provider.__init__)
                 self.init_provider(arg, hints, arg.provider)
                 continue
 
             # check if it is a class of any type
             if isinstance(arg, type):
-                hints = get_type_hints(arg.__init__)
+                hints = get_hints(arg.__init__)
                 self._targets[arg] = ProvideTarget(
-                    callable=arg, provides=arg, requires=get_requires_from_hints(hints)
+                    callable=arg, provides=arg, requires=get_requires_from_hints(
+                        hints)
                 )
                 continue
 
             if callable(arg):
-                hints = get_type_hints(arg)
+                hints = get_hints(arg)
                 if "return" not in hints:
                     raise MissingHintError(
                         "Provide target must have a return type hint"
@@ -69,6 +70,20 @@ class Provide(Option):
         mod.add_provides(self._targets)
 
 
+def get_hints(arg):
+    # check if has annotations
+    if not hasattr(arg, "__annotations__"):
+        return get_type_hints(arg)
+    hints = arg.__annotations__
+    for key, value in hints.items():
+        if get_origin(value) == Annotated:
+            for a in value.__metadata__:
+                if isinstance(a, Annotations):
+                    hints[key] = a.to_provider(get_args(value)[0])
+                    break
+    return hints
+
+
 class Invoke(Option):
     def __init__(self, *args):
         self._targets = []
@@ -76,10 +91,11 @@ class Invoke(Option):
             if not callable(arg):
                 raise PyDITypeError("Provide target must be callable")
 
-            hints = get_type_hints(arg)
+            hints = get_hints(arg)
 
             self._targets.append(
-                InvokeTarget(callable=arg, requires=get_requires_from_hints(hints))
+                InvokeTarget(
+                    callable=arg, requires=get_requires_from_hints(hints))
             )
 
     def apply(self, mod: Module):

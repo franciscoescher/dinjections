@@ -1,4 +1,5 @@
 import unittest
+from typing import Annotated
 
 from src.dinjections import *
 
@@ -19,7 +20,7 @@ class TestClass3:
 
 
 def new_test_class_3(
-    p: Provider(TestClass1, "t1"), p2: Provider(TestClass1, "t2"), r: TestClass2
+    p: Annotated[TestClass1, Annotations("t1")], p2: Annotated[TestClass1, Annotations("t2")], r: TestClass2
 ) -> TestClass3:
     return TestClass3()
 
@@ -41,6 +42,33 @@ def register_hooks_no_hint(l: Lifecycle, t):
 
 
 class TestApp(unittest.TestCase):
+    def test_annotated(self):
+        def test_with_annotation(
+                p: Annotated[TestClass1, Annotations("t1")]) -> Annotated[TestClass3, Annotations("t2")]:
+            return TestClass3()
+
+        def register_hooks_annotated(l: Lifecycle, t: Annotated[TestClass3, Annotations("t2")]):
+            l.append_hook(
+                Hook(
+                    on_start=lambda: {t.run()},
+                )
+            )
+        try:
+            app = App(
+                Provide(
+                    # test named provider
+                    Provider(TestClass1, "t1"),
+                    test_with_annotation,
+                ),
+                Invoke(
+                    register_hooks_annotated,
+                ),
+            )
+            app.run()
+        except Exception as e:
+            self.fail("Exception: " + str(e))
+        self.assertTrue(True)
+
     def test_app(self):
         try:
             app = App(
@@ -100,7 +128,7 @@ class TestApp(unittest.TestCase):
 
     def test_missing_hint_error(self):
         def new_test_class_3_no_hint(
-            p: Provider(TestClass1, "t1"), p2: Provider(TestClass1, "t2"), r: TestClass2
+            p: Annotated[TestClass1, Annotations("t1")], p2: Annotated[TestClass1, Annotations("t2")], r: TestClass2
         ):
             return TestClass3()
 
@@ -149,7 +177,7 @@ class TestApp(unittest.TestCase):
 
     def test_missing_hint_error_input_provide(self):
         def new_test_class_3_no_hint_input(
-            p: Provider(TestClass1, "t1"), p2: Provider(TestClass1, "t2"), r
+            p: Annotated[TestClass1, Annotations("t1")], p2: Annotated[TestClass1, Annotations("t2")], r
         ) -> TestClass3:
             return TestClass3()
 
@@ -176,7 +204,7 @@ class TestApp(unittest.TestCase):
 
     def test_group(self):
         def new_test_class_3_group(
-            p: Provider(TestClass1, group=True), r: TestClass2
+            p: Annotated[TestClass1, Annotations(group=True)], r: TestClass2
         ) -> TestClass3:
             return TestClass3()
 
@@ -221,10 +249,10 @@ class TestApp(unittest.TestCase):
         self.assertTrue(True)
 
     def test_callable_with_provider(self):
-        def new_test_class_3_named(p: TestClass1) -> Provider(TestClass3, name="t3"):
+        def new_test_class_3_named(p: TestClass1) -> Annotated[TestClass3, Annotations(name="t3")]:
             return TestClass3()
 
-        def register_hooks_named(l: Lifecycle, t: Provider(TestClass3, name="t3")):
+        def register_hooks_named(l: Lifecycle, t: Annotated[TestClass3, Annotations(name="t3")]):
             l.append_hook(
                 Hook(
                     on_start=lambda: {t.run()},
