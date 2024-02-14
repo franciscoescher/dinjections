@@ -1,8 +1,16 @@
-from typing import get_type_hints, Annotated, get_origin, get_args
+from typing import get_type_hints, Annotated, get_origin, get_args, Generic, TypeVar
 
 from .app import *
 from .exceptions import *
 from .module import *
+
+
+T = TypeVar('T', bound='Parameter')
+
+
+class Parameter(Generic[T]):
+    def __call__(self) -> T:
+        return self
 
 
 class Provide(Option):
@@ -43,8 +51,7 @@ class Provide(Option):
                     continue
 
             raise PyDITypeError(
-                "Provide target must be a callable constructor, a class or a Provider"
-            )
+                "Provide target must be a callable constructor, a class or a Provider: ", arg)
 
     def init_provider(self, arg: Provider, hints: dict, call: callable):
         if not arg.group:
@@ -72,6 +79,8 @@ class Provide(Option):
 
 def get_hints(arg):
     # check if has annotations
+    if issubclass(type(arg), Parameter):
+        return {"return": type(arg)}
     if not hasattr(arg, "__annotations__"):
         return get_type_hints(arg)
     hints = arg.__annotations__

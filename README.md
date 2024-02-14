@@ -139,6 +139,36 @@ app = App(
 app.run()
 ```
 
+## Providing objects directly
+```python 
+from dinjections import App, Provide, Invoke, Hook, Lifecycle, Provider, Annotated, Annotations, Parameter
+
+# inherit class Parameter (with generic type) to define a dependency that will be provided as object
+class MyDependency(Parameter["MyDependency"]):
+    def __init__(self):
+
+    def run(self):
+        print("MyDependency running")
+
+def register_hooks(l: Lifecycle, d: MyDependency):
+    # d is now a list of MyDependency, with all the dependencies named "md" that were provided
+    for t in d:
+        l.append_hook(Hook(
+            on_start=lambda: {
+                t.run()
+            },
+        ))
+
+my_dep = MyDependency()
+
+app = App(
+    Provide(my_dep),
+    Invoke(
+        register_hooks,
+    ))
+app.run()
+```
+
 
 ## Lifecycle
 
