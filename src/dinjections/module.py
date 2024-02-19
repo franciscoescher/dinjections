@@ -92,8 +92,11 @@ class Module(Option):
 
             provides_target = key_in(key, self._provides)
             if provides_target is None:
+                tg = ""
+                if target:
+                    tg = f" for target {target.provides}"
                 raise MissingDependencyError(
-                    f"Cannot find dependency for target {target.provides}: {key}, {self._provides}"
+                    f"Cannot find dependency{tg}: {key}, {self._provides}"
                 )
 
             target = key_in(key, self.container)
